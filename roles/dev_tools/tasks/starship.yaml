@@ -1,0 +1,42 @@
+- name: Install Starship
+  ansible.builtin.shell:
+    cmd: curl -sS https://starship.rs/install.sh | sh -s -- -y
+  args:
+    creates: "/usr/local/bin/starship"
+  become: true
+  tags: starship
+
+- name: Add Starship initialization to .bashrc
+  ansible.builtin.lineinfile:
+    path: "/home/{{ target_user }}/.bashrc"
+    line: 'eval "$(starship init bash)"'
+    insertafter: EOF
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+    state: present
+  become: true
+  become_user: "{{ target_user }}"
+  tags: starship
+
+- name: Ensure .config directory exists with correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ target_user }}/.config"
+    state: directory
+    mode: '0700'
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+  become: true
+  become_user: "{{ target_user }}"
+  tags: starship
+
+- name: Copy custom starship.toml configuration
+  ansible.builtin.copy:
+    src: starship.toml
+    dest: "/home/{{ target_user }}/.config/starship.toml"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  become: true
+  become_user: "{{ target_user }}"
+  tags: starship

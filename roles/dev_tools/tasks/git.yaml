@@ -1,0 +1,30 @@
+- name: Ensure Git and util packages are installed
+  ansible.builtin.dnf:
+    name:
+      - git
+      - git-lfs
+      - git-delta
+    state: present
+  tags: git
+
+- name: Ensure .config/git directory exists with correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ target_user }}/.config/git"
+    state: directory
+    mode: '0700'
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+  become: true
+  become_user: "{{ target_user }}"
+  tags: git
+
+- name: Copy custom configuration file
+  ansible.builtin.copy:
+    src: git.config
+    dest: "/home/{{ target_user }}/.config/git/config"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  become: true
+  become_user: "{{ target_user }}"
+  tags: git

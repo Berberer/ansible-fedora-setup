@@ -1,0 +1,10 @@
+.ansible_vault_pass
+inventory/*.cache
+
+*.retry             # Files created when a playbook fails with retries
+*.pyc               # Python compiled files (if you use custom modules/plugins)
+__pycache__/        # Python cache directories
+
+.venv/
+venv/
+env/

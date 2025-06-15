@@ -1,0 +1,8 @@
+- name: Include DNF package management tasks
+  ansible.builtin.include_tasks: dnf.yaml
+
+- name: Include Readline configuration tasks
+  ansible.builtin.include_tasks: readline.yaml
+
+- name: Include SSH setup tasks
+  ansible.builtin.include_tasks: ssh.yaml

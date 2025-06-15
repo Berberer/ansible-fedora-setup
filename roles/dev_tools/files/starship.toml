@@ -1,0 +1,101 @@
+add_newline = true
+command_timeout = 5000
+format = "[╭─](foreground_light_grey)[](fg:background_blue)$os$username$hostname$localip$directory[](fg:background_blue)$git_branch$git_commit$git_state$git_metrics$git_status$docker_context$nix_shell$direnv$env_var$sudo$container$shell$fill$status$character$cmd_duration$time\n[╰╴❯ ](foreground_light_grey)\n"
+palette = "default"
+
+[fill]
+symbol = " "
+
+[character]
+error_symbol = "[](bold red)"
+success_symbol = "[](bold green)"
+
+[cmd_duration]
+disabled = false
+format = "[took](foreground_light_grey) [$duration]($style) "
+style = "bold foreground_yellow"
+
+[directory]
+format = "[$path]($style)[$read_only]($read_only_style)"
+home_symbol = ""
+read_only = ""
+read_only_style = "fg:foreground_dark_grey bg:background_blue"
+style = "fg:foreground_dark_grey bg:background_blue"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[direnv]
+disabled = false
+format = " [in](foreground_light_grey) [](fg:background_green)[$symbol $loaded/$allowed]($style)[](fg:background_green)"
+style = "bold fg:foreground_dark_grey bg:background_green"
+symbol = "󱁿"
+
+[git_branch]
+format = " [on](foreground_light_grey) [](fg:background_orange)[$symbol$branch(:$remote_branch)]($style)"
+style = "bold fg:foreground_dark_grey bg:background_orange"
+
+[git_commit]
+format = "[( \\($hash$tag\\))]($style)"
+style = "bold fg:foreground_dark_grey bg:background_orange"
+
+[git_metrics]
+added_style = "bold fg:green bg:background_orange"
+deleted_style = "bold fg:red bg:background_orange"
+disabled = false
+format = "[( [+$added]($added_style) [-$deleted]($deleted_style))](bg:background_orange)"
+
+[git_state]
+format = "[( \\($state( $progress_current/$progress_total)\\))]($style)"
+style = "bold fg:foreground_dark_grey bg:background_orange"
+
+[git_status]
+ahead = " ⇡$count "
+behind = " ⇣$count "
+conflicted = " 󱝽 $count "
+deleted = " 󱙑 $count"
+diverged = " ⇕⇡$ahead_count⇣$behind_count "
+format = "[( \\[$all_status$ahead_behind\\])]($style)[](fg:background_orange)"
+modified = " 󱞁 $count "
+staged = " 󱝿 $count "
+stashed = "  $count "
+style = "bold fg:foreground_dark_grey bg:background_orange"
+untracked = " 󰎜 $count "
+
+[hostname]
+style = "fg:foreground_dark_grey bg:background_blue"
+
+[localip]
+style = "fg:foreground_dark_grey bg:background_blue"
+
+[nix_shell]
+format = " [in](foreground_light_grey) [](fg:background_green)[$symbol $state (\\($name\\))]($style)[](fg:background_green)"
+style = "bold fg:foreground_dark_grey bg:background_green"
+symbol = ""
+
+[os]
+disabled = false
+format = "[$symbol ]($style)"
+style = "fg:foreground_dark_grey bg:background_blue"
+
+[os.symbols]
+Fedora = ""
+
+[time]
+disabled = false
+format = "[at](foreground_light_grey) [$time]($style)"
+style = "bold foreground_yellow"
+
+[username]
+format = "[$user]($style)[ in ](fg:foreground_dark_grey bg:background_blue)"
+style_root = "fg:red bg:background_blue"
+style_user = "fg:foreground_dark_grey bg:background_blue"
+
+[palettes.default]
+foreground_light_grey = "#cdd6f4"
+foreground_dark_grey = "#6c7086"
+foreground_yellow = "#f9e2af"
+background_blue = "#89b4fa"
+background_green = "#a6e3a1"
+background_orange = "#fab387"
+background_pink = "#f2cdcd"
+background_red = "#f38ba8"

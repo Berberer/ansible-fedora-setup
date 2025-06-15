@@ -1,0 +1,25 @@
+- name: Initial Setup for a Fedora WSL system (Local Execution)
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - ansible.builtin.include_tasks: common_tasks/pre_config.yaml
+
+  roles:
+    - role: base_setup
+      tags:
+        - packages
+        - readline
+        - ssh
+
+    - role: dev_tools
+      tags:
+        - git
+        - podman
+        - lix
+        - starship
+
+  post_tasks:
+    - ansible.builtin.include_tasks: common_tasks/post_config.yaml

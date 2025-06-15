@@ -1,0 +1,4 @@
+- name: Autoremove unneeded dnf packages
+  ansible.builtin.dnf:
+    autoremove: yes
+  tags: always

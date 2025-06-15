@@ -1,0 +1,11 @@
+- name: Ensure common packages are installed
+  ansible.builtin.dnf:
+    name: "{{ common_packages }}"
+    state: present
+  tags: packages
+
+- name: Ensure unwanted packages are removed
+  ansible.builtin.dnf:
+    name: "{{ packages_to_remove }}"
+    state: absent
+  tags: packages

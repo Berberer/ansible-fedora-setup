@@ -1,0 +1,11 @@
+- name: Include git setup tasks
+  ansible.builtin.include_tasks: git.yaml
+
+- name: Include Podman setup tasks
+  ansible.builtin.include_tasks: podman.yaml
+
+- name: Include Lix package manager setup tasks for dev shells
+  ansible.builtin.include_tasks: lix.yaml
+
+- name: Include Starship prompt setup tasks
+  ansible.builtin.include_tasks: starship.yaml

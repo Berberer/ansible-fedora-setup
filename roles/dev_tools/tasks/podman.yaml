@@ -1,0 +1,50 @@
+- name: Ensure Podman packages are installed
+  ansible.builtin.dnf:
+    name:
+      - podman
+      - podman-compose
+    state: present
+  tags: podman
+
+- name: Create systemd service for Podman orphan cleanup
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Podman Orphan Container/Image Cleanup
+      After=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/podman system prune --force --volumes
+    dest: /etc/systemd/system/podman-orphan-cleanup.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd daemon
+  tags: podman
+
+- name: Create systemd timer for Podman orphan cleanup
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Run Podman Orphan Container/Image Cleanup weekly
+
+      [Timer]
+      OnCalendar=weekly
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+    dest: /etc/systemd/system/podman-orphan-cleanup.timer
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd daemon
+  tags: podman
+
+- name: Ensure Podman orphan cleanup timer is enabled and started
+  ansible.builtin.systemd:
+    name: podman-orphan-cleanup.timer
+    enabled: true
+    state: started
+  tags: podman

@@ -1,0 +1,15 @@
+- name: Ensure Readline configuration is set for bash autocompletion
+  ansible.builtin.lineinfile:
+    path: "/home/{{ target_user }}/.inputrc"
+    line: "{{ item.line }}"
+    create: yes
+    mode: '0644'
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    regexp: "^{{ item.regexp | default(item.line) }}$"
+  loop:
+    - { line: 'set completion-ignore-case On', regexp: '^set completion-ignore-case' }
+    - { line: 'set bell-style none', regexp: '^set bell-style' }
+  become: true
+  become_user: "{{ target_user }}"
+  tags: readline

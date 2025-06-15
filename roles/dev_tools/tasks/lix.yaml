@@ -1,0 +1,125 @@
+- name: Ensure direnv is installed
+  ansible.builtin.dnf:
+    name: "direnv"
+    state: present
+  tags: lix
+
+- name: Add direnv initialization to .bashrc
+  ansible.builtin.lineinfile:
+    path: "/home/{{ target_user }}/.bashrc"
+    line: 'eval "$(direnv hook bash)"'
+    insertafter: EOF
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+    state: present
+  become: true
+  become_user: "{{ target_user }}"
+  tags: lix
+
+- name: Install the Lix package manager
+  ansible.builtin.shell:
+    cmd: curl -sS https://install.lix.systems/lix | sh -s -- install linux --no-confirm --no-modify-profile
+  args:
+    creates: "{{ lix_binary_directory }}/nix"
+  become: true
+  tags: lix
+
+- name: Ensure .config/nix directory exists with correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ target_user }}/.config/nix"
+    state: directory
+    mode: '0700'
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+  become: true
+  become_user: "{{ target_user }}"
+  tags: lix
+
+- name: Create Lix configuration at user level
+  ansible.builtin.template:
+    src: "templates/lix_config.j2"
+    dest: "/home/{{ target_user }}/.config/nix/nix.conf"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  become: true
+  become_user: "{{ target_user }}"
+  tags: lix
+
+- name: Configure Lix trusted-users in /etc/nix/nix.conf
+  ansible.builtin.lineinfile:
+    path: /etc/nix/nix.conf
+    regexp: '^trusted-users ='
+    line: "trusted-users = @wheel {{ target_user }}"
+    state: present
+    create: no
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  tags: lix
+
+- name: Ensure Lix binaries directory is added to PATH
+  ansible.builtin.blockinfile:
+    path: "/home/{{ target_user }}/.bashrc"
+    block: |
+      if [ -d "{{ lix_binary_directory }}" ]; then
+        case ":$PATH:" in
+          *:"{{ lix_binary_directory }}":*)
+            ;;
+          *)
+            export PATH="{{ lix_binary_directory }}:$PATH"
+            ;;
+        esac
+      fi
+    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR LIX BIN PATH"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  become: true
+  become_user: "{{ target_user }}"
+  tags: lix
+
+- name: Create systemd service for Lix garbage collection
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Lix Garbage Collection
+      After=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ lix_binary_directory }}/nix-collect-garbage -d
+    dest: /etc/systemd/system/lix-garbage-collection.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd daemon
+  tags: lix
+
+- name: Create systemd timer for Lix garbage collection
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Run Lix garbage collection weekly
+
+      [Timer]
+      OnCalendar=weekly
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+    dest: /etc/systemd/system/lix-garbage-collection.timer
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd daemon
+  tags: lix
+
+- name: Ensure Lix garbage collection timer is enabled and started
+  ansible.builtin.systemd:
+    name: lix-garbage-collection.timer
+    enabled: true
+    state: started
+  tags: lix
