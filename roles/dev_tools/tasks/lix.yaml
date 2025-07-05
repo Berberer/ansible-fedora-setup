@@ -47,6 +47,29 @@
   become_user: "{{ target_user }}"
   tags: lix
 
+- name: Ensure .config/nixpkgs directory exists with correct permissions
+  ansible.builtin.file:
+    path: "/home/{{ target_user }}/.config/nixpkgs"
+    state: directory
+    mode: '0700'
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+  become: true
+  become_user: "{{ target_user }}"
+  tags: lix
+
+- name: Create Nixpkgs configuration at user level
+  ansible.builtin.copy:
+    content: |
+      {
+        allowUnfree = true;
+      }
+    dest: "/home/{{ target_user }}/.config/nixpkgs/config.nix"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+  tags: lix
+
 - name: Configure Lix trusted-users in /etc/nix/nix.conf
   ansible.builtin.lineinfile:
     path: /etc/nix/nix.conf
