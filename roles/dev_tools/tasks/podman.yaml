@@ -1,9 +1,21 @@
-- name: Ensure Podman packages are installed
+- name: Ensure Podman and Docker Compose packages are installed
   ansible.builtin.dnf:
     name:
       - podman
-      - podman-compose
+      - podman-docker
+      - docker-compose
     state: present
+  tags: podman
+
+- name: Ensure Podman Daemon Socket is enabled and started
+  ansible.builtin.systemd:
+    name: podman.socket
+    scope: user
+    enabled: true
+    state: started
+  become: true
+  become_user: "{{ target_user }}"
+  notify: Reload systemd daemon
   tags: podman
 
 - name: Create systemd service for Podman orphan cleanup
