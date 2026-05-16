@@ -1,6 +1,5 @@
 common_packages:
   - wget
-  - htop
   - fastfetch
 packages_to_remove:
   - toolbox

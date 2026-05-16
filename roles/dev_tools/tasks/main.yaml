@@ -4,8 +4,8 @@
 - name: Include Podman setup tasks
   ansible.builtin.include_tasks: podman.yaml
 
-- name: Include Lix package manager setup tasks for dev shells
-  ansible.builtin.include_tasks: lix.yaml
+- name: Include Nix package manager setup tasks for dev shells
+  ansible.builtin.include_tasks: nix.yaml
 
 - name: Include Starship prompt setup tasks
   ansible.builtin.include_tasks: starship.yaml

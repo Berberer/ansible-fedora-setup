@@ -2,7 +2,7 @@
   ansible.builtin.dnf:
     name: "direnv"
     state: present
-  tags: lix
+  tags: nix
 
 - name: Add direnv initialization to .bashrc
   ansible.builtin.lineinfile:
@@ -15,15 +15,15 @@
     state: present
   become: true
   become_user: "{{ target_user }}"
-  tags: lix
+  tags: nix
 
-- name: Install the Lix package manager
-  ansible.builtin.shell:
-    cmd: curl -sS https://install.lix.systems/lix | sh -s -- install linux --no-confirm --no-modify-profile
-  args:
-    creates: "{{ lix_binary_directory }}/nix"
-  become: true
-  tags: lix
+- name: Ensure Nix is installed
+  ansible.builtin.dnf:
+    name:
+      - nix
+      - nix-daemon
+    state: present
+  tags: nix
 
 - name: Ensure .config/nix directory exists with correct permissions
   ansible.builtin.file:
@@ -34,18 +34,18 @@
     group: "{{ target_user }}"
   become: true
   become_user: "{{ target_user }}"
-  tags: lix
+  tags: nix
 
-- name: Create Lix configuration at user level
+- name: Create Nix configuration at user level
   ansible.builtin.template:
-    src: "templates/lix_config.j2"
+    src: "templates/nix_config.j2"
     dest: "/home/{{ target_user }}/.config/nix/nix.conf"
     owner: "{{ target_user }}"
     group: "{{ target_user }}"
     mode: '0644'
   become: true
   become_user: "{{ target_user }}"
-  tags: lix
+  tags: nix
 
 - name: Ensure .config/nixpkgs directory exists with correct permissions
   ansible.builtin.file:
@@ -56,7 +56,7 @@
     group: "{{ target_user }}"
   become: true
   become_user: "{{ target_user }}"
-  tags: lix
+  tags: nix
 
 - name: Create Nixpkgs configuration at user level
   ansible.builtin.copy:
@@ -68,9 +68,9 @@
     owner: "{{ target_user }}"
     group: "{{ target_user }}"
     mode: '0644'
-  tags: lix
+  tags: nix
 
-- name: Configure Lix trusted-users in /etc/nix/nix.conf
+- name: Configure Nix trusted-users in /etc/nix/nix.conf
   ansible.builtin.lineinfile:
     path: /etc/nix/nix.conf
     regexp: '^trusted-users ='
@@ -81,51 +81,37 @@
     group: root
     mode: '0644'
   become: true
-  tags: lix
+  tags: nix
 
-- name: Ensure Lix binaries directory is added to PATH
-  ansible.builtin.blockinfile:
-    path: "/home/{{ target_user }}/.bashrc"
-    block: |
-      if [ -d "{{ lix_binary_directory }}" ]; then
-        case ":$PATH:" in
-          *:"{{ lix_binary_directory }}":*)
-            ;;
-          *)
-            export PATH="{{ lix_binary_directory }}:$PATH"
-            ;;
-        esac
-      fi
-    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR LIX BIN PATH"
-    owner: "{{ target_user }}"
-    group: "{{ target_user }}"
-    mode: '0644'
-  become: true
-  become_user: "{{ target_user }}"
-  tags: lix
+- name: Ensure Nix Daemon enabled and started
+  ansible.builtin.systemd:
+    name: nix-daemon
+    enabled: true
+    state: started
+  tags: nix
 
-- name: Create systemd service for Lix garbage collection
+- name: Create systemd service for Nix garbage collection
   ansible.builtin.copy:
     content: |
       [Unit]
-      Description=Lix Garbage Collection
+      Description=Nix Garbage Collection
       After=network-online.target
 
       [Service]
       Type=oneshot
-      ExecStart={{ lix_binary_directory }}/nix-collect-garbage -d
-    dest: /etc/systemd/system/lix-garbage-collection.service
+      ExecStart=/usr/bin/nix-collect-garbage -d
+    dest: /etc/systemd/system/nix-garbage-collection.service
     owner: root
     group: root
     mode: '0644'
   notify: Reload systemd daemon
-  tags: lix
+  tags: nix
 
-- name: Create systemd timer for Lix garbage collection
+- name: Create systemd timer for Nix garbage collection
   ansible.builtin.copy:
     content: |
       [Unit]
-      Description=Run Lix garbage collection weekly
+      Description=Run Nix garbage collection weekly
 
       [Timer]
       OnCalendar=weekly
@@ -133,16 +119,16 @@
 
       [Install]
       WantedBy=timers.target
-    dest: /etc/systemd/system/lix-garbage-collection.timer
+    dest: /etc/systemd/system/nix-garbage-collection.timer
     owner: root
     group: root
     mode: '0644'
   notify: Reload systemd daemon
-  tags: lix
+  tags: nix
 
-- name: Ensure Lix garbage collection timer is enabled and started
+- name: Ensure Nix garbage collection timer is enabled and started
   ansible.builtin.systemd:
-    name: lix-garbage-collection.timer
+    name: nix-garbage-collection.timer
     enabled: true
     state: started
-  tags: lix
+  tags: nix
