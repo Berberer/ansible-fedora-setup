@@ -1,6 +1,6 @@
 - name: Ensure common packages are installed
   ansible.builtin.dnf:
-    name: "{{ common_packages }}"
+    name: "{{ common_packages + (desktop_packages | default([])) }}"
     state: present
   tags: packages
 

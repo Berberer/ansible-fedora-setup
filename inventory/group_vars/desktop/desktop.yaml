@@ -1,0 +1,3 @@
+# Desktop-specific variables
+# Add packages and configuration for desktop environment here
+desktop_packages: []

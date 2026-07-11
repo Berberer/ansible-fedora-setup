@@ -1,0 +1,13 @@
+- name: Run all headless setup steps
+  ansible.builtin.import_playbook: headless.yaml
+
+- name: Additional setup steps for a Fedora desktop environment
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: false
+
+  roles:
+    - role: desktop_init
+      tags:
+        - desktop

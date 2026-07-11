@@ -14,7 +14,8 @@ Ansible playbooks to perform an opinionated initial setup of a Fedora Setup.
 
 ## Running a Playbook
 The following playbooks are available to be run via local execution:
-- `wsl.yaml`: Initial Setup for a Fedora WSL system
+- `headless.yaml`: Initial Setup for a Fedora headless system (e.g. WSL, servers)
+- `desktop.yaml`: Initial Setup for a Fedora desktop system (includes all headless steps plus desktop extras)
 
 Choose a playbook and change the `target_user` variable to your username. Then run the selected playbook:
 ```bash

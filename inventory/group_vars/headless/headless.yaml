@@ -1,0 +1,3 @@
+# Headless-specific variables
+# Packages here are installed in addition to base_setup/vars/main.yaml common_packages
+# Override common_packages here if you need different defaults for headless systems
