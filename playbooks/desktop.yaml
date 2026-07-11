@@ -10,4 +10,4 @@
   roles:
     - role: desktop_init
       tags:
-        - desktop
+        - nerd_font

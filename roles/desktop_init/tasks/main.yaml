@@ -1,3 +1,2 @@
----
-# Desktop-specific setup tasks
-# Add desktop environment configuration here (fonts, themes, GUI packages, etc.)
+- name: Install a specified Nerd Font variant
+  ansible.builtin.include_tasks: nerd_font.yaml
